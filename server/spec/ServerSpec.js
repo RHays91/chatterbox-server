@@ -73,7 +73,13 @@ describe('Node Server Request Listener Function', function() {
     // Testing for a newline isn't a valid test
     // TODO: Replace with with a valid test
     // expect(res._data).to.equal(JSON.stringify('\n'));
-    expect(res._ended).to.equal(true);
+    // expect(res._ended).to.equal(true);
+    // console.log(JSON.stringify(stubMsg));
+    // expect(res._data).to.equal(JSON.stringify(stubMsg));
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('Jono');
+    expect(messages[0].message).to.equal('Do my bidding!');
   });
 
 it('Should respond with messages that were previously posted', function() {
