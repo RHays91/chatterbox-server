@@ -1,56 +1,42 @@
-// var request = require('request');
+var url = require('url');
 var results = [];
+var counter = 1;
 
 var requestHandler = function(request, response) {
   console.log("Serving request type " + request.method + " for url " + request.url);
-
-
+  // console.log(request.method);
 
   var headers = defaultCorsHeaders;
-  if(request.method === 'GET' || request.options === 'OPTIONS'){
-    //do we need to parse the url to GET from the right place?
-    var url = request.url;
-    // var statusCode = 200;
-    // var headers = defaultCorsHeaders;
+  if(request.method === 'GET' || request.method === 'OPTIONS'){
+    var url_parts = url.parse(request.url, true);
+    var query = url_parts.query;
+    console.log(url_parts);
     headers['Content-Type'] = "application/json";
-    response.writeHead(200, headers);
-
-    jsonResponse = {
-      results: results
-    };
-
-    // response.end(JSON.stringify(jsonResponse));
-    
-
-    var chunkResponse = "";
-
-    request.on('data', function(data){
-      //how do we collect the results array?
-      // chunkResponse += data.toString();
-      // console.log(data);
-    })
-    request.on('end', function(){
+    if (url_parts.pathname.substring(1,8) !== 'classes'){
+      response.writeHead(404, headers);
+      response.end();
+    } else {
+      response.writeHead(200, headers);
+      jsonResponse = {
+        results: results
+      };
       response.end(JSON.stringify(jsonResponse));
-      // console.log(JSON.stringify(jsonResponse));
-    })
+    }
   }
-  else if (request.method ==='POST' || request.options === 'OPTIONS'){
-    //we need to parse the url to post to the correct place
-    var url = request.url;
-    // var statusCode = 201;
+  else if (request.method ==='POST'){
     headers['Content-Type'] = "application/json";
     response.writeHead(201, headers);
-    // var jsonResponse ={
-    //   results: []
-    // };
-
     var chunkResponse = "";
     request.on('data', function(data){
-      chunkResponse += data;//.toString();
+      chunkResponse += data;
     });
     request.on('end', function(){
-      results.push(JSON.parse(chunkResponse))
-      response.end();
+      chunkResponse = JSON.parse(chunkResponse);
+      chunkResponse.objectId = counter;
+      counter++;
+      chunkResponse.createdAt = new Date();
+      results.push(chunkResponse)
+      response.end(JSON.stringify(results));
     })
   }
 };

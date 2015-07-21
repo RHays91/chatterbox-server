@@ -14,7 +14,7 @@ $(function() {
 
     init: function() {
       // Get username
-      app.username = window.location.search.substr(10);
+      app.username = window.location.search.substr(10) || app.username;
 
       // Cache jQuery selectors
       app.$main = $('#main');
@@ -29,20 +29,21 @@ $(function() {
       app.$roomSelect.on('change', app.saveRoom);
 
       // Fetch previous messages
-      app.startSpinner();
+      // app.startSpinner();
       app.fetch(false);
 
       // Poll for new messages
       setInterval(app.fetch, 3000);
     },
     send: function(data) {
-      app.startSpinner();
+      console.log(data);
+      // app.startSpinner();
       // Clear messages input
       app.$message.val('');
 
       // POST the message to the server
       $.ajax({
-        url: app.server,
+        url: app.server+'/classes',
         type: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json',
@@ -57,11 +58,14 @@ $(function() {
       });
     },
     fetch: function(animate) {
+      var displayedRoom = $('.chat span').first().data('roomname');
       $.ajax({
-        url: app.server,
+        url: app.server+'/classes',
         type: 'GET',
         contentType: 'application/json',
-        // data: { order: '-createdAt'},
+        data: { order: '-createdAt',
+                roomname: displayedRoom
+              },
         success: function(data) {
           console.log('chatterbox: Messages fetched');
 
@@ -70,8 +74,8 @@ $(function() {
 
           // Get the last message
           var mostRecentMessage = data.results[data.results.length-1];
-          var displayedRoom = $('.chat span').first().data('roomname');
-          app.stopSpinner();
+          // var displayedRoom = $('.chat span').first().data('roomname');
+          // app.stopSpinner();
           // Only bother updating the DOM if we have a new message
           if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
             // Update the UI with the fetched rooms
@@ -85,7 +89,6 @@ $(function() {
           }
         },
         error: function(data) {
-          console.log(data.results);
           console.error('chatterbox: Failed to fetch messages');
         }
       });
@@ -97,7 +100,7 @@ $(function() {
       // Clear existing messages
 
       app.clearMessages();
-      app.stopSpinner();
+      // app.stopSpinner();
       if (Array.isArray(results)) {
         // Add all fetched messages
         results.forEach(app.addMessage);
@@ -202,7 +205,7 @@ $(function() {
         }
       }
       else {
-        app.startSpinner();
+        // app.startSpinner();
         // Store as undefined for empty names
         app.roomname = app.$roomSelect.val();
 
@@ -216,20 +219,19 @@ $(function() {
         text: app.$message.val(),
         roomname: app.roomname || 'lobby'
       };
-      console.log('submit button works');
       app.send(message);
 
       // Stop the form from submitting
       evt.preventDefault();
-    },
-    startSpinner: function(){
-      $('.spinner img').show();
-      $('form input[type=submit]').attr('disabled', "true");
-    },
-
-    stopSpinner: function(){
-      $('.spinner img').fadeOut('fast');
-      $('form input[type=submit]').attr('disabled', null);
     }
+    // startSpinner: function(){
+    //   $('.spinner img').show();
+    //   $('form input[type=submit]').attr('disabled', "true");
+    // },
+
+    // stopSpinner: function(){
+    //   $('.spinner img').fadeOut('fast');
+    //   $('form input[type=submit]').attr('disabled', null);
+    // }
   };
 }());
