@@ -33,7 +33,7 @@ $(function() {
       app.fetch(false);
 
       // Poll for new messages
-      // setInterval(app.fetch, 3000);
+      setInterval(app.fetch, 3000);
     },
     send: function(data) {
       app.startSpinner();
@@ -61,7 +61,7 @@ $(function() {
         url: app.server,
         type: 'GET',
         contentType: 'application/json',
-        data: { order: '-createdAt'},
+        // data: { order: '-createdAt'},
         success: function(data) {
           console.log('chatterbox: Messages fetched');
 
@@ -85,6 +85,7 @@ $(function() {
           }
         },
         error: function(data) {
+          console.log(data.results);
           console.error('chatterbox: Failed to fetch messages');
         }
       });
