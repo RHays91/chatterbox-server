@@ -1,8 +1,12 @@
 var url = require('url');
+var fs = require('fs');
 var results = [];
 var counter = 1;
 
-var requestHandler = function(request, response) {
+var requestHandler = function(request, response, html) {
+  response.writeHeader(200, {"Content-Type": "text/html"});  // <-- HERE!
+  response.write(html);  // <-- HERE!
+  response.end();
   console.log("Serving request type " + request.method + " for url " + request.url);
   // console.log(request.method);
 
